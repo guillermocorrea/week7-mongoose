@@ -34,6 +34,21 @@ module.exports = function(app) {
                 var user = {_id: email};
                 user.salt = bytes.toString('utf8');
                 user.hash = hash(pass, user.salt);
+
+                User.create(user, function(err, newUser) {
+                   if (err) {
+                       if (err instanceof mongoose.Error.ValidationError) {
+                           return invalid();
+                       }
+                       return next(err);
+                   }
+
+                    // user created successfully
+                    req.session.isLoggedIn = true;
+                    req.session.user = email;
+                    console.log('created user %s', email);
+                    return res.redirect('/');
+                });
             });
         });
 
